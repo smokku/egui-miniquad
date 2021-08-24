@@ -161,7 +161,7 @@ impl EguiMq {
         self.shapes = Some(shapes);
 
         let egui::Output {
-            cursor_icon,
+            cursor_icon: _,
             open_url,
             copied_text,
             needs_repaint: _,             // miniquad always runs at full framerate
@@ -174,15 +174,15 @@ impl EguiMq {
             quad_url::link_open(&url.url, url.new_tab);
         }
 
-        if cursor_icon == egui::CursorIcon::None {
-            mq_ctx.show_mouse(false);
-        } else {
-            mq_ctx.show_mouse(true);
+        // if cursor_icon == egui::CursorIcon::None {
+        //     mq_ctx.show_mouse(false);
+        // } else {
+        //     mq_ctx.show_mouse(true);
 
-            let mq_cursor_icon = to_mq_cursor_icon(cursor_icon);
-            let mq_cursor_icon = mq_cursor_icon.unwrap_or(mq::CursorIcon::Default);
-            mq_ctx.set_mouse_cursor(mq_cursor_icon);
-        }
+        //     let mq_cursor_icon = to_mq_cursor_icon(cursor_icon);
+        //     let mq_cursor_icon = mq_cursor_icon.unwrap_or(mq::CursorIcon::Default);
+        //     mq_ctx.set_mouse_cursor(mq_cursor_icon);
+        // }
 
         if !copied_text.is_empty() {
             self.set_clipboard(mq_ctx, copied_text);
@@ -363,6 +363,7 @@ fn to_egui_button(mb: mq::MouseButton) -> egui::PointerButton {
     }
 }
 
+#[allow(dead_code)]
 fn to_mq_cursor_icon(cursor_icon: egui::CursorIcon) -> Option<mq::CursorIcon> {
     match cursor_icon {
         // Handled outside this function
