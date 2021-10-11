@@ -110,9 +110,6 @@ mod painter;
 use egui::CursorIcon;
 use miniquad as mq;
 
-#[cfg(target_os = "macos")] // https://github.com/not-fl3/miniquad/issues/172
-use copypasta::ClipboardProvider;
-
 /// egui bindings for miniquad.
 ///
 ///
@@ -120,8 +117,6 @@ pub struct EguiMq {
     egui_ctx: egui::CtxRef,
     egui_input: egui::RawInput,
     painter: painter::Painter,
-    #[cfg(target_os = "macos")]
-    clipboard: Option<copypasta::ClipboardContext>,
     shapes: Option<Vec<egui::epaint::ClippedShape>>,
 }
 
@@ -131,8 +126,6 @@ impl EguiMq {
             egui_ctx: egui::CtxRef::default(),
             painter: painter::Painter::new(mq_ctx),
             egui_input: Default::default(),
-            #[cfg(target_os = "macos")]
-            clipboard: init_clipboard(),
             shapes: None,
         }
     }
@@ -308,49 +301,12 @@ impl EguiMq {
         }
     }
 
-    #[cfg(not(target_os = "macos"))]
     fn set_clipboard(&mut self, mq_ctx: &mut mq::Context, text: String) {
         mq::clipboard::set(mq_ctx, text.as_str());
     }
 
-    #[cfg(not(target_os = "macos"))]
     fn get_clipboard(&mut self, mq_ctx: &mut mq::Context) -> Option<String> {
         mq::clipboard::get(mq_ctx)
-    }
-
-    #[cfg(target_os = "macos")]
-    fn set_clipboard(&mut self, _mq_ctx: &mut mq::Context, text: String) {
-        if let Some(clipboard) = &mut self.clipboard {
-            if let Err(err) = clipboard.set_contents(text) {
-                eprintln!("Copy/Cut error: {}", err);
-            }
-        }
-    }
-
-    #[cfg(target_os = "macos")]
-    fn get_clipboard(&mut self, _mq_ctx: &mut mq::Context) -> Option<String> {
-        if let Some(clipboard) = &mut self.clipboard {
-            match clipboard.get_contents() {
-                Ok(contents) => Some(contents),
-                Err(err) => {
-                    eprintln!("Paste error: {}", err);
-                    None
-                }
-            }
-        } else {
-            None
-        }
-    }
-}
-
-#[cfg(target_os = "macos")]
-fn init_clipboard() -> Option<copypasta::ClipboardContext> {
-    match copypasta::ClipboardContext::new() {
-        Ok(clipboard) => Some(clipboard),
-        Err(err) => {
-            eprintln!("Failed to initialize clipboard: {}", err);
-            None
-        }
     }
 }
 
